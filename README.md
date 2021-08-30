@@ -64,3 +64,7 @@ Only show chat contains 草:
 ```bash
 --filter 'message.includes("草")'
 ```
+
+## Community
+
+Ask questions in `#masterchat` channel on [holodata Discord server](https://holodata.org/discord).

@@ -1,13 +1,10 @@
 import chalk from "chalk";
-import { logAndExit } from "epicfail";
 import fs from "node:fs";
 import {
   Action,
   convertRunsToString,
-  fetchContext,
-  iterateChat,
+  Masterchat,
   normalizeVideoId,
-  timeoutThen,
 } from "masterchat";
 import { VM, VMScript } from "vm2";
 
@@ -130,33 +127,9 @@ export async function inspectChat(argv: any) {
   const filter = compileFilter(filterExp);
 
   // get web player context
-  const context = await fetchContext(videoId);
-  if (!context) {
-    throw new Error("context not found");
-  }
-  const { metadata, chat, apiKey } = context;
+  const mc = await Masterchat.init(videoId);
 
-  // check if the stream is live
-  const isLive = metadata.isLive;
-
-  if (!isLive) {
-    logAndExit("only live stream is supported");
-  }
-
-  if (!chat) {
-    logAndExit(
-      "reload continuation not found. try again later or maybe it's a normal video."
-    );
-  }
-
-  console.log("title:", metadata.title);
-
-  const initialToken = chat.continuations[type].token;
-
-  const liveChatIter = iterateChat({
-    apiKey,
-    token: initialToken,
-  });
+  console.log("title:", mc.metadata.title);
 
   let chatQueue: string[] = [];
   let wait = 0;
@@ -172,8 +145,7 @@ export async function inspectChat(argv: any) {
     }
   });
 
-  // fetch chat
-  for await (const response of liveChatIter) {
+  for await (const response of mc.iterateChat(type)) {
     if (response.error) {
       const { error } = response;
       console.log(`Error(${error.status}): ${error.message}`);
@@ -223,10 +195,8 @@ export async function inspectChat(argv: any) {
 
       wait += delay || 0;
     }
-
-    await timeoutThen(delay);
   }
 
-  console.log("Live stream is over");
+  console.log("Live stream has ended");
   process.exit(0);
 }
