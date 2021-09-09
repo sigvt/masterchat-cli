@@ -1,11 +1,6 @@
 import chalk from "chalk";
+import { Action, Masterchat, normalizeVideoId, runsToString } from "masterchat";
 import fs from "node:fs";
-import {
-  Action,
-  convertRunsToString,
-  Masterchat,
-  normalizeVideoId,
-} from "masterchat";
 import { VM, VMScript } from "vm2";
 
 export function stringifyActions(
@@ -28,7 +23,7 @@ export function stringifyActions(
         }
 
         text += action.rawMessage
-          ? convertRunsToString(action.rawMessage)
+          ? runsToString(action.rawMessage)
           : "<empty message>";
 
         text += ` (${action.superchat.amount} ${action.superchat.currency})`;
@@ -64,7 +59,7 @@ export function stringifyActions(
           text += ": ";
         }
 
-        text += convertRunsToString(action.rawMessage);
+        text += runsToString(action.rawMessage);
 
         simpleChat.push(text);
         break;
@@ -129,7 +124,7 @@ export async function inspectChat(argv: any) {
   // get web player context
   const mc = await Masterchat.init(videoId);
 
-  console.log("title:", mc.metadata.title);
+  console.log("title:", mc.title);
 
   let chatQueue: string[] = [];
   let wait = 0;
@@ -145,12 +140,7 @@ export async function inspectChat(argv: any) {
     }
   });
 
-  for await (const response of mc.iterateChat(type)) {
-    if (response.error) {
-      const { error } = response;
-      console.log(`Error(${error.status}): ${error.message}`);
-      break;
-    }
+  for await (const response of mc.iterate({ topChat: type === "top" })) {
     const { actions, continuation } = response;
     const delay = continuation?.timeoutMs || 0;
 
@@ -177,7 +167,7 @@ export async function inspectChat(argv: any) {
             isSuperchat: action.type === "addSuperChatItemAction",
             message:
               "rawMessage" in action && action.rawMessage
-                ? convertRunsToString(action.rawMessage)
+                ? runsToString(action.rawMessage)
                 : "",
           };
           return filter(filterContext);

@@ -2,9 +2,9 @@
 
 import yargs from "yargs";
 import { inspectChat } from "./commands/liveChat";
-import epicfail from "epicfail";
+import { epicfail } from "epicfail";
 
-epicfail();
+epicfail(require.main?.filename!);
 
 const argv = yargs(process.argv.slice(2))
   .scriptName("masterchat")
