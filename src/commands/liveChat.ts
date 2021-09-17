@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { Action, Masterchat, normalizeVideoId, runsToString } from "masterchat";
+import { Action, Masterchat, toVideoId, runsToString } from "masterchat";
 import fs from "node:fs";
 import { VM, VMScript } from "vm2";
 
@@ -23,7 +23,7 @@ export function stringifyActions(
         }
 
         text += action.rawMessage
-          ? runsToString(action.rawMessage)
+          ? runsToString(action.rawMessage, { spaces: true })
           : "<empty message>";
 
         text += ` (${action.superchat.amount} ${action.superchat.currency})`;
@@ -59,7 +59,7 @@ export function stringifyActions(
           text += ": ";
         }
 
-        text += runsToString(action.rawMessage);
+        text += runsToString(action.rawMessage, { spaces: true });
 
         simpleChat.push(text);
         break;
@@ -110,7 +110,10 @@ export async function inspectChat(argv: any) {
     process.exit(0);
   });
 
-  const videoId: string = normalizeVideoId(argv.video);
+  const videoId: string | undefined = toVideoId(argv.video);
+  if (!videoId) {
+    throw new Error(`Invalid videoId: ${argv.video}`);
+  }
   const verbose: boolean = argv.verbose;
   const showModeration: boolean = argv.mod;
   const showAuthor: boolean = argv.author;
@@ -167,7 +170,7 @@ export async function inspectChat(argv: any) {
             isSuperchat: action.type === "addSuperChatItemAction",
             message:
               "rawMessage" in action && action.rawMessage
-                ? runsToString(action.rawMessage)
+                ? runsToString(action.rawMessage, { spaces: true })
                 : "",
           };
           return filter(filterContext);

@@ -1,5 +1,8 @@
 # MasterChat CLI
 
+[![npm](https://badgen.net/npm/v/masterchat-cli)](https://npmjs.org/package/masterchat-cli)
+[![npm: total downloads](https://badgen.net/npm/dt/masterchat-cli)](https://npmjs.org/package/masterchat-cli)
+
 See YouTube Live Chat through flexible filtering engine. For GUI version, see [Komet](https://github.com/holodata/komet).
 
 ## Install
