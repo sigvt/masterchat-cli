@@ -23,7 +23,8 @@
   "dependencies": {
     "epicfail": "^3.0.0",
     "masterchat": "^0.11.0",
-    "vm2": "^3.9.3"
+    "vm2": "^3.9.3",
+    "yargs": "^17.2.1"
   },
   "devDependencies": {
     "@types/jest": "^27.0.1",
