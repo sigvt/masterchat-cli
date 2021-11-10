@@ -2,6 +2,7 @@ import chalk from "chalk";
 import { Action, Masterchat, toVideoId, runsToString } from "masterchat";
 import fs from "node:fs";
 import { VM, VMScript } from "vm2";
+import { logAndExit } from "epicfail";
 
 export function stringifyActions(
   actions: Action[],
@@ -112,7 +113,7 @@ export async function inspectChat(argv: any) {
 
   const videoId: string | undefined = toVideoId(argv.video);
   if (!videoId) {
-    throw new Error(`Invalid videoId: ${argv.video}`);
+    logAndExit(`Invalid videoId: ${argv.video}`);
   }
   const verbose: boolean = argv.verbose;
   const showModeration: boolean = argv.mod;

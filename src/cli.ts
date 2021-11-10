@@ -47,6 +47,6 @@ const argv = yargs(process.argv.slice(2))
     alias: "c",
     type: "boolean",
   })
-  .showHelpOnFail(false).argv;
+  .demand(1).argv;
 
 inspectChat(argv);
