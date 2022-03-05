@@ -4,40 +4,42 @@
   "version": "0.7.3",
   "author": "Yasuaki Uechi <y@uechi.io> (https://uechi.io/)",
   "scripts": {
-    "build": "tsc && shx chmod +x ./lib/cli.js",
-    "clean": "shx rm -rf lib",
+    "build": "tsc && shx chmod +x ./dist/cli.js",
+    "clean": "shx rm -rf dist",
     "dev": "tsc -w",
     "format": "pretty-quick --staged",
     "prepare": "husky install",
     "prepublishOnly": "npm run clean && npm run build",
     "test": "npm run build && jest"
   },
-  "main": "lib/cli.js",
+  "main": "dist/cli.js",
   "bin": {
-    "masterchat": "lib/cli.js",
-    "mc": "lib/cli.js"
+    "masterchat": "dist/cli.js",
+    "mc": "dist/cli.js"
   },
   "files": [
-    "lib"
+    "dist"
   ],
   "dependencies": {
+    "chalk": "^4.1.2",
+    "cross-fetch": "^3.1.4",
     "epicfail": "^3.0.0",
     "masterchat": "^0.13.0",
     "vm2": "^3.9.5",
     "yargs": "^17.2.1"
   },
   "devDependencies": {
-    "@types/jest": "^27.0.2",
-    "@types/node": "^16.11.7",
+    "@types/jest": "^27.0.3",
+    "@types/node": "^16.11.10",
     "execa": "^5.1.1",
     "husky": "^7.0.4",
     "jest": "^27.3.1",
     "prettier": "^2.4.1",
-    "pretty-quick": "^3.1.1",
+    "pretty-quick": "^3.1.2",
     "shx": "^0.3.3",
     "ts-jest": "^27.0.7",
     "ts-node": "^10.4.0",
-    "typescript": "^4.4.4"
+    "typescript": "^4.5.2"
   },
   "homepage": "https://github.com/holodata/masterchat-cli",
   "repository": {

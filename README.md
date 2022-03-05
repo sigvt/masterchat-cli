@@ -1,30 +1,37 @@
-# MasterChat CLI
+# Masterchat CLI
 
 [![npm](https://badgen.net/npm/v/masterchat-cli)](https://npmjs.org/package/masterchat-cli)
 [![npm: total downloads](https://badgen.net/npm/dt/masterchat-cli)](https://npmjs.org/package/masterchat-cli)
 
-See YouTube Live Chat through flexible filtering engine. For GUI version, see [Komet](https://github.com/holodata/komet).
+See YouTube Live Chat through a flexible filtering engine. For a desktop app, see [☄️ Komet](https://github.com/holodata/komet).
 
 ## Install
 
-```
+```bash
 npm i -g masterchat-cli
+masterchat --help
+# or
+mc --help
 ```
 
 ## Use
 
-```
-masterchat <videoUrl or videoId>
+```bash
+mc live <video ID or URL> # mimic live chat
+mc events [video ID or URL] # print all observed events from all the VTubers
+mc pbd # protobuf inspector
 ```
 
-## Options
+### `live`
+
+#### Options
 
 - `--type <string>`: Chat type (`top` or `all`)
 - `--mod`: Show moderation events
 - `--author`: Show author name
 - `--filter <string>`: Filter rule
 
-### Useful Filter Rules
+#### Useful Filter Rules
 
 Only show moderators' chat:
 
