@@ -54,7 +54,7 @@ export function printData({
         if (chatCount < maxChats) {
           log(
             chalk.gray(`${action.authorChannelId} ${action.authorName}:`),
-            stringify(action.message)
+            stringify(action.message!)
           )
           chatCount += 1
         }
@@ -106,6 +106,26 @@ export function printData({
             } (${action.duration}): ${
               action.message ? stringify(action.message) : "<empty message>"
             }`
+          )
+        )
+        break
+      }
+      case "membershipGiftPurchaseAction": {
+        log(
+          chalk.green(
+            `[membership gift purchase] ${action.authorName} (${
+              action.membership.status
+            } ${action.membership.since ?? ""}) gifted ${
+              action.amount
+            } memberships for ${action.channelName}`
+          )
+        )
+        break
+      }
+      case "membershipGiftRedemptionAction": {
+        log(
+          chalk.green(
+            `[membership gift redemption] ${action.authorName} was gifted a membership by ${action.senderName}`
           )
         )
         break
@@ -197,7 +217,23 @@ ${action.authorName}: ${stringify(action.message)}
         break
       }
       case "addViewerEngagementMessageAction": {
-        log(chalk.cyan(`[${action.messageType}] ${stringify(action.message)}`))
+        log(chalk.cyan(`[engagement] ${stringify(action.message)}`))
+        break
+      }
+      case "addPollResultAction": {
+        log(
+          chalk.cyan(
+            `[poll result] Q. ${
+              action.question ? stringify(action.question) : "<empty>"
+            }
+${action.choices
+  .map(
+    (choice, i) =>
+      `${i + 1}. ${stringify(choice.text)} (${choice.votePercentage})`
+  )
+  .join("\n")}`
+          )
+        )
         break
       }
       case "modeChangeAction": {

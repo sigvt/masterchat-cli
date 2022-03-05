@@ -21,7 +21,7 @@ export class ChatHistory {
       cid: action.authorChannelId,
       oid,
       name: action.authorName,
-      msg: stringify(action.message),
+      msg: stringify(action.message!),
     }
   }
   insert(action: AddChatItemAction, oid: string) {

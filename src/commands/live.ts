@@ -71,7 +71,7 @@ export function stringifyActions(
           text += ": "
         }
 
-        text += stringify(action.message, { spaces: true })
+        text += stringify(action.message!, { spaces: true })
 
         simpleChat.push(text)
         break
