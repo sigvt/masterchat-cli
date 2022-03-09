@@ -24,12 +24,12 @@
     "chalk": "^4.1.2",
     "cross-fetch": "^3.1.4",
     "epicfail": "^3.0.0",
-    "masterchat": "^0.13.0",
-    "vm2": "^3.9.5",
+    "masterchat": "^0.14.0",
+    "vm2": "^3.9.9",
     "yargs": "^17.2.1"
   },
   "devDependencies": {
-    "@types/jest": "^27.0.3",
+    "@types/jest": "^27.4.1",
     "@types/node": "^16.11.10",
     "execa": "^5.1.1",
     "husky": "^7.0.4",
@@ -38,8 +38,8 @@
     "pretty-quick": "^3.1.2",
     "shx": "^0.3.3",
     "ts-jest": "^27.0.7",
-    "ts-node": "^10.4.0",
-    "typescript": "^4.5.2"
+    "ts-node": "^10.7.0",
+    "typescript": "^4.6.2"
   },
   "homepage": "https://github.com/holodata/masterchat-cli",
   "repository": {
