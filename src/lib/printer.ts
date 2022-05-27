@@ -216,6 +216,15 @@ ${action.authorName}: ${stringify(action.message)}
         )
         break
       }
+      case "addRedirectBannerAction": {
+        log(
+          chalk.yellowBright(`=================
+[banner ${action.actionId}] ${stringify(action.targetId)}
+${action.authorName} started redirecting their viewers to here}
+=================`)
+        )
+        break
+      }
       case "addViewerEngagementMessageAction": {
         log(chalk.cyan(`[engagement] ${stringify(action.message)}`))
         break

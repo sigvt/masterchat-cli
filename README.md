@@ -9,70 +9,51 @@ See YouTube Live Chat through a flexible filtering engine. For a desktop app, se
 
 ```bash
 npm i -g masterchat-cli
+
 masterchat --help
-# or
 mc --help
 ```
 
 ## Use
 
-```bash
-mc live <video ID or URL> # mimic live chat
-mc events [video ID or URL] # print all observed events from all the VTubers
-mc pbd # protobuf inspector
-```
+### `print`
 
-### `live`
+Print live/replay chats.
+
+```bash
+mc print <video ID or URL>
+mc print WpjhEqjngRQ --filter 'isSuperchat && color === "green"' --author # Only show green super chats
+mc print WpjhEqjngRQ --filter 'isMember' # Only show chats from members
+mc print WpjhEqjngRQ --filter 'isModerator || isVerified || isOwner' --author # Print chats from moderators/verified accounts/channel owner
+mc print WpjhEqjngRQ --filter '/^(\\[[a-z]+?\\]|[a-z]+?: )/i.test(message)' # Print live translations
+mc print WpjhEqjngRQ --filter 'message.includes("草")' # Only show chat contains 草
+```
 
 #### Options
 
-- `--type <string>`: Chat type (`top` or `all`)
-- `--mod`: Show moderation events
-- `--author`: Show author name
-- `--filter <string>`: Filter rule
+- `--type, -t <string>`: Chat type (`top` or `all`)
+- `--author, -a`: Show author name
+- `--filter, -f <string>`: Filter chat/superchat events
+- `--mod, -m`: Print moderation events
+- `--verbose, -v`: Print additional info
+- `--collect, -c`: Save received actions as JSONLines (.jsonl)
 
-#### Useful Filter Rules
+### `watch`
 
-Only show moderators' chat:
+Print all events except live chats.
 
 ```bash
---filter isModerator
+mc watch
+mc watch --org Hololive
+mc watch WpjhEqjngRQ
 ```
 
-Only show chat from verified account or channel owner:
+### `pbd`
+
+pb params decoder.
 
 ```bash
---filter 'isVerified || isOwner'
-```
-
-Only show super chat:
-
-```bash
---filter superchat
-```
-
-Only show red super chat:
-
-```bash
---filter 'superchat && superchat.color == "red"'
-```
-
-Only show membership chat:
-
-```bash
---filter membership
-```
-
-Only show live translations:
-
-```bash
---filter '/^(\\[[a-z]+?\\]|[a-z]+?: )/i.test(message)'
-```
-
-Only show chat contains 草:
-
-```bash
---filter 'message.includes("草")'
+mc pbd 'EglwbGF5bGlzdHM%3D'
 ```
 
 ## Community

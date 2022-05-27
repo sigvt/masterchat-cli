@@ -1,7 +1,5 @@
 .vscode
 .envrc
-package-lock.json
-yarn.lock
 /dist
 
 # Created by https://www.toptal.com/developers/gitignore/api/node

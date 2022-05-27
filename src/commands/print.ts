@@ -6,11 +6,13 @@ import { VM, VMScript } from "vm2"
 import { Arguments, CommandModule } from "yargs"
 
 interface Args {
-  video: string
+  videoId: string
+  channelId?: string
   verbose: boolean
   type: string
+  mode: "live" | "replay" | undefined
   filter?: string
-  mod: boolean
+  mods: boolean
   author: boolean
   collect: boolean
 }
@@ -122,24 +124,31 @@ async function handler(argv: Arguments<Args>) {
     process.exit(0)
   })
 
-  const videoId: string | undefined = toVideoId(argv.video)
+  const videoId: string | undefined = toVideoId(argv.videoId)
   if (!videoId) {
     logAndExit(`Invalid videoId: ${argv.video}`)
   }
+
+  const chanelId = argv.channelId
+
+  const mode = argv.mode
   const verbose: boolean = argv.verbose
-  const showModeration: boolean = argv.mod
+  const showModeration: boolean = argv.mods
   const showAuthor: boolean = argv.author
   const collectionMode: boolean = argv.collect
-  const type = argv.type as "top" | "all"
+  const topChat = (argv.type as "top" | "all") === "top"
   const filterExp: string = Array.isArray(argv.filter)
     ? argv.filter[0]
     : argv.filter
   const filter = compileFilter(filterExp)
 
-  // get web player context
-  const mc = await Masterchat.init(videoId)
+  const mc = chanelId
+    ? new Masterchat(videoId, chanelId, { mode })
+    : await Masterchat.init(videoId, { mode })
 
-  console.log("title:", mc.title)
+  if (mc.title) console.log("title:", mc.title)
+  console.log(`mode: ${mc.isLive ? "live" : "replay"}`)
+  console.log("-----------------")
 
   let chatQueue: string[] = []
   let wait = 0
@@ -155,7 +164,7 @@ async function handler(argv: Arguments<Args>) {
     }
   })
 
-  for await (const response of mc.iterate({ topChat: type === "top" })) {
+  for await (const response of mc.iterate({ topChat })) {
     const { actions, continuation } = response
     const delay = continuation?.timeoutMs || 0
 
@@ -187,6 +196,9 @@ async function handler(argv: Arguments<Args>) {
           const filterContext = {
             ...action,
             isSuperchat: action.type === "addSuperChatItemAction",
+            isMember:
+              action.type === "addChatItemAction" &&
+              action.membership !== undefined,
             message:
               "message" in action && action.message
                 ? stringify(action.message, { spaces: true })
@@ -214,19 +226,17 @@ async function handler(argv: Arguments<Args>) {
 }
 
 const commandModule: CommandModule<{}, Args> = {
-  command: "live <video>",
-  describe: "Mimic live chat",
+  command: "print <videoId> [channelId]",
+  describe: "Print live chat events",
   handler,
   builder: {
-    video: {
-      desc: "video id or url",
+    videoId: {
+      desc: "Video ID or URL",
       type: "string",
     },
-    verbose: {
-      describe: "Print additional info",
-      alias: "v",
-      default: false,
-      type: "boolean",
+    channelId: {
+      desc: "Channel ID",
+      type: "string",
     },
     type: {
       describe: "Chat type",
@@ -234,22 +244,33 @@ const commandModule: CommandModule<{}, Args> = {
       default: "top",
       choices: ["top", "all"],
     },
+    mode: {
+      describe: "Live chat mode",
+      alias: "m",
+      default: undefined,
+      choices: ["live", "replay"],
+    },
     filter: {
       describe: "Filter rule",
       alias: "f",
       type: "string",
-    },
-    mod: {
-      describe: "Print moderation events",
-      alias: "m",
-      type: "boolean",
-      default: false,
     },
     author: {
       describe: "Print author name",
       alias: "a",
       type: "boolean",
       default: false,
+    },
+    mods: {
+      describe: "Print moderation events",
+      type: "boolean",
+      default: false,
+    },
+    verbose: {
+      describe: "Print additional info",
+      alias: "v",
+      default: false,
+      type: "boolean",
     },
     collect: {
       describe: "Save received actions as JSONLines (.jsonl)",

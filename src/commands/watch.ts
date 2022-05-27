@@ -6,14 +6,15 @@ import { ChatHistory } from "../lib/history"
 import fetch from "cross-fetch"
 
 interface Args {
-  query?: string
+  videoId?: string
+  channelId?: string
   org?: string
   upcomingHours?: number
 }
 
 async function getStreams(
   org: string = "All Vtubers",
-  upcomingHours: number = 4
+  upcomingHours: number = 1
 ) {
   const res = await fetch(
     `https://holodex.net/api/v2/live?org=${encodeURIComponent(
@@ -47,19 +48,18 @@ async function handlerMux(org?: string) {
   }
 }
 
-async function handlerSingle(query: string) {
-  if (!query) {
-    throw new Error("missing videoId or URL")
-  }
-
+async function handlerSingle(videoId: string, channelId?: string) {
   const history = new ChatHistory()
-  const mc = await Masterchat.init(query)
+
+  const mc = channelId
+    ? new Masterchat(videoId, channelId)
+    : await Masterchat.init(videoId)
 
   const url = `https://youtu.be/${mc.videoId}`
 
-  console.log(mc.title)
-  console.log(mc.channelName)
-  console.log(url)
+  if (mc.title) console.log(mc.title)
+  if (mc.channelName) console.log(mc.channelName)
+  console.log(url, `(${mc.isLive ? "live" : "replay"})`)
   console.log("-----------------")
 
   mc.on("data", (data) => printData({ data, history, mc }))
@@ -70,22 +70,25 @@ async function handlerSingle(query: string) {
 }
 
 async function handler(args: Arguments<Args>) {
-  if (args.query) {
-    handlerSingle(args.query)
+  if (args.videoId) {
+    handlerSingle(args.videoId, args.channelId)
   } else {
     handlerMux(args.org)
   }
 }
 
 const commandModule: CommandModule<{}, Args> = {
-  command: "events",
-  describe: "inspect events other than chats",
+  command: "watch [videoId] [channelId]",
+  describe: "Pretty-print all events except live chat",
   builder: {
-    query: {
-      desc: "query",
+    videoId: {
+      desc: "Video ID or URL",
+    },
+    channelId: {
+      desc: "Channel id",
     },
     org: {
-      desc: "organization (for mux)",
+      desc: "Organization name to watch (ignored if `videoId` is provided)",
       default: "All Vtubers",
     },
   },
