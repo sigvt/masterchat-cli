@@ -24,6 +24,7 @@
     "chalk": "^4.1.2",
     "cross-fetch": "^3.1.4",
     "epicfail": "^3.0.0",
+    "lru-cache": "^7.10.1",
     "masterchat": "^0.14.0",
     "vm2": "^3.9.9",
     "yargs": "^17.2.1"

@@ -1,9 +1,13 @@
 import chalk from "chalk"
+import fetch from "cross-fetch"
 import { logAndExit } from "epicfail"
-import { Action, Masterchat, stringify, toVideoId } from "masterchat"
+import { Action, Masterchat, stringify, toVideoId, YTRun } from "masterchat"
 import fs from "node:fs/promises"
 import { VM, VMScript } from "vm2"
 import { Arguments, CommandModule } from "yargs"
+import LRU from "lru-cache"
+
+const imageCache = new LRU({ max: 500 })
 
 interface Args {
   videoId: string
@@ -17,13 +21,71 @@ interface Args {
   collect: boolean
 }
 
-export function stringifyActions(
+function toBuffer(ab: ArrayBuffer) {
+  const buf = Buffer.alloc(ab.byteLength)
+  const view = new Uint8Array(ab)
+  for (let i = 0; i < buf.length; ++i) {
+    buf[i] = view[i]
+  }
+  return buf
+}
+
+async function toInlineImage(url: string, fallback: string = "") {
+  const isiTerm = process.env.TERM_PROGRAM === "iTerm.app"
+  if (!isiTerm) return fallback
+  const cached = imageCache.get<string>(url)
+  if (cached) return cached
+  // console.log(chalk.red("no cache hit", imageCache.size))
+  try {
+    const buf = toBuffer(await fetch(url).then((res) => res.arrayBuffer()))
+    const content = buf.toString("base64")
+    const args = {
+      size: buf.byteLength,
+      inline: 1,
+      height: 1,
+      // width: "auto",
+      // preserveAspectRatio: 1,
+    }
+    const argsString = Object.entries(args)
+      .map(([k, v]) => `${k}=${v}`)
+      .join(";")
+    const ansiString = `\u001B]1337;File=${argsString}:${content}\u0007`
+    imageCache.set(url, ansiString)
+    return ansiString
+  } catch (err) {
+    return fallback
+  }
+}
+
+async function termify(msg: YTRun[]): Promise<string> {
+  let res = ""
+
+  for (const run of msg) {
+    if ("text" in run) {
+      res += run.text
+    } else if ("emoji" in run) {
+      const { emoji } = run
+      if (!emoji.isCustomEmoji) {
+        res += emoji.emojiId
+      } else {
+        const shortcut = emoji.shortcuts[emoji.shortcuts.length - 1]
+        const url =
+          emoji.image.thumbnails[emoji.image.thumbnails.length - 1].url
+        res += await toInlineImage(url, shortcut)
+      }
+    }
+  }
+
+  return res
+}
+
+export async function stringifyActions(
   actions: Action[],
   {
     ignoreModerationEvents = true,
     showAuthor = true,
   }: { ignoreModerationEvents?: boolean; showAuthor?: boolean } = {}
-): string[] {
+): Promise<string[]> {
   const simpleChat: string[] = []
 
   for (const action of actions) {
@@ -64,6 +126,8 @@ export function stringifyActions(
             badges.push("⚡️")
           }
 
+          text += await toInlineImage(action.authorPhoto)
+          text += " "
           text += colorize(action.authorName)
 
           if (badges.length >= 1) {
@@ -73,7 +137,7 @@ export function stringifyActions(
           text += ": "
         }
 
-        text += stringify(action.message!, { spaces: true })
+        text += await termify(action.message!)
 
         simpleChat.push(text)
         break
@@ -208,7 +272,7 @@ async function handler(argv: Arguments<Args>) {
         })
       }
 
-      const chat: string[] = stringifyActions(aggregatedActions, {
+      const chat: string[] = await stringifyActions(aggregatedActions, {
         ignoreModerationEvents: !showModeration,
         showAuthor,
       })
