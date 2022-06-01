@@ -34,7 +34,7 @@ mc print WpjhEqjngRQ --filter 'message.includes("草")' # Only show chat contain
 - `--type, -t <string>`: Chat type (`top` or `all`)
 - `--author, -a`: Show author name
 - `--filter, -f <string>`: Filter chat/superchat events
-- `--mod, -m`: Print moderation events
+- `--mod`: Print moderation events
 - `--verbose, -v`: Print additional info
 - `--collect, -c`: Save received actions as JSONLines (.jsonl)
 

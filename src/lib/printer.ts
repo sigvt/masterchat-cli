@@ -6,7 +6,7 @@ import {
   stringify,
   SuperChat,
 } from "masterchat"
-import { ChatHistory } from "./history"
+import { ChatHistory } from "./history.js"
 
 export function printData({
   data,
@@ -89,9 +89,9 @@ export function printData({
           chalk.green(
             `[membership joined] Welcome${
               action.level ? ` ${action.level},` : ""
-            } ${action.authorName} !: ${action.membership.status} ${
-              action.membership.since ?? ""
-            }`
+            } ${action.authorName} !: ${
+              action.membership?.status ?? "No status"
+            } ${action.membership?.since ?? ""}`
           )
         )
         break
@@ -99,11 +99,11 @@ export function printData({
       case "addMembershipMilestoneItemAction": {
         log(
           chalk.green(
-            `[milestone ${action.authorName} (${action.membership.status} ${
-              action.membership.since ?? ""
-            })] Member${action.level ? ` of ${action.level}` : ""} for ${
-              action.durationText
-            } (${action.duration}): ${
+            `[milestone ${action.authorName} (${
+              action.membership?.status ?? "No status"
+            } ${action.membership?.since ?? ""})] Member${
+              action.level ? ` of ${action.level}` : ""
+            } for ${action.durationText} (${action.duration}): ${
               action.message ? stringify(action.message) : "<empty message>"
             }`
           )

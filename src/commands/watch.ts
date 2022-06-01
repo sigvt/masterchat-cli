@@ -1,8 +1,8 @@
 import chalk from "chalk"
 import { Masterchat, StreamPool } from "masterchat"
 import { Arguments, CommandModule } from "yargs"
-import { printData } from "../lib/printer"
-import { ChatHistory } from "../lib/history"
+import { printData } from "../lib/printer.js"
+import { ChatHistory } from "../lib/history.js"
 import fetch from "cross-fetch"
 
 interface Args {

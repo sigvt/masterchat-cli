@@ -1,4 +1,4 @@
-import execa from "execa"
+import { execa } from "execa"
 
 it("can run", async () => {
   const res = await execa("node", ["./dist/cli.js", "--help"])

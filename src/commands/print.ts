@@ -1,11 +1,12 @@
 import chalk from "chalk"
 import fetch from "cross-fetch"
 import { logAndExit } from "epicfail"
+import LRU from "lru-cache"
 import { Action, Masterchat, stringify, toVideoId, YTRun } from "masterchat"
 import fs from "node:fs/promises"
 import { VM, VMScript } from "vm2"
 import { Arguments, CommandModule } from "yargs"
-import LRU from "lru-cache"
+import { chalkSc } from "../lib/printer.js"
 
 const imageCache = new LRU({ max: 500 })
 
@@ -30,31 +31,30 @@ function toBuffer(ab: ArrayBuffer) {
   return buf
 }
 
-async function toInlineImage(url: string, fallback: string = "") {
-  const isiTerm = process.env.TERM_PROGRAM === "iTerm.app"
-  if (!isiTerm) return fallback
+function isiTerm() {
+  return process.env.TERM_PROGRAM === "iTerm.app"
+}
+
+async function toInlineImage(url: string) {
   const cached = imageCache.get<string>(url)
   if (cached) return cached
-  // console.log(chalk.red("no cache hit", imageCache.size))
-  try {
-    const buf = toBuffer(await fetch(url).then((res) => res.arrayBuffer()))
-    const content = buf.toString("base64")
-    const args = {
-      size: buf.byteLength,
-      inline: 1,
-      height: 1,
-      // width: "auto",
-      // preserveAspectRatio: 1,
-    }
-    const argsString = Object.entries(args)
-      .map(([k, v]) => `${k}=${v}`)
-      .join(";")
-    const ansiString = `\u001B]1337;File=${argsString}:${content}\u0007`
-    imageCache.set(url, ansiString)
-    return ansiString
-  } catch (err) {
-    return fallback
+
+  const buf = toBuffer(await fetch(url).then((res) => res.arrayBuffer()))
+  const content = buf.toString("base64")
+  const args = {
+    size: buf.byteLength,
+    inline: 1,
+    height: 1,
+    // width: "auto",
+    // preserveAspectRatio: 1,
   }
+  const argsString = Object.entries(args)
+    .map(([k, v]) => `${k}=${v}`)
+    .join(";")
+  const ansiString = `\u001B]1337;File=${argsString}:${content}\u0007`
+  imageCache.set(url, ansiString)
+
+  return ansiString
 }
 
 async function termify(msg: YTRun[]): Promise<string> {
@@ -71,7 +71,7 @@ async function termify(msg: YTRun[]): Promise<string> {
         const shortcut = emoji.shortcuts[emoji.shortcuts.length - 1]
         const url =
           emoji.image.thumbnails[emoji.image.thumbnails.length - 1].url
-        res += await toInlineImage(url, shortcut)
+        res += isiTerm() ? await toInlineImage(url) : shortcut
       }
     }
   }
@@ -94,17 +94,21 @@ export async function stringifyActions(
         let text = ""
 
         if (showAuthor) {
+          if (isiTerm()) {
+            text += await toInlineImage(action.authorPhoto)
+            text += " "
+          }
           text += chalk.gray(action.authorName)
           text += ": "
         }
 
         text += action.message
-          ? stringify(action.message, { spaces: true })
+          ? await termify(action.message)
           : "<empty message>"
 
         text += ` (${action.amount} ${action.currency})`
 
-        simpleChat.push(text)
+        simpleChat.push(chalkSc(action.color)(text))
         break
       }
       case "addChatItemAction": {
@@ -126,8 +130,11 @@ export async function stringifyActions(
             badges.push("⚡️")
           }
 
-          text += await toInlineImage(action.authorPhoto)
-          text += " "
+          if (isiTerm()) {
+            text += await toInlineImage(action.authorPhoto)
+            text += " "
+          }
+
           text += colorize(action.authorName)
 
           if (badges.length >= 1) {
@@ -285,7 +292,6 @@ async function handler(argv: Arguments<Args>) {
     }
   }
 
-  console.log("Live stream has ended")
   process.exit(0)
 }
 
