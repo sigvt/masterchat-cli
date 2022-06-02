@@ -1,6 +1,7 @@
-import { execa } from "execa"
+import { execa } from "execa";
+import { expect, test } from "vitest";
 
-it("can run", async () => {
-  const res = await execa("node", ["./dist/cli.js", "--help"])
-  expect(res.stdout).toContain("Commands:")
-})
+test("can run", async () => {
+  const res = await execa("node", ["./dist/cli.js", "--help"]);
+  expect(res.stdout).toContain("Commands:");
+});

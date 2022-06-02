@@ -10,7 +10,7 @@
     "format": "pretty-quick --staged",
     "prepare": "husky install",
     "prepublishOnly": "npm run clean && npm run build",
-    "test": "npm run build && jest"
+    "test": "npm run build && vitest run"
   },
   "type": "module",
   "main": "dist/cli.js",
@@ -31,17 +31,15 @@
     "yargs": "^17.5.1"
   },
   "devDependencies": {
-    "@types/jest": "^27.5.1",
     "@types/node": "^17.0.36",
     "execa": "^6.1.0",
     "husky": "^8.0.1",
-    "jest": "^28.1.0",
     "prettier": "^2.6.2",
     "pretty-quick": "^3.1.2",
     "shx": "^0.3.3",
-    "ts-jest": "^28.0.3",
     "ts-node": "^10.8.0",
-    "typescript": "^4.7.2"
+    "typescript": "^4.7.2",
+    "vitest": "^0.13.1"
   },
   "homepage": "https://github.com/holodata/masterchat-cli",
   "repository": {
