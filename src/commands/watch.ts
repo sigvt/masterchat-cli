@@ -1,9 +1,14 @@
 import chalk from "chalk"
-import { Masterchat, StreamPool } from "masterchat"
-import { Arguments, CommandModule } from "yargs"
-import { printData } from "../lib/printer.js"
-import { ChatHistory } from "../lib/history.js"
 import fetch from "cross-fetch"
+import {
+  AddChatItemAction,
+  ChatResponse,
+  Masterchat,
+  StreamPool,
+} from "masterchat"
+import { Arguments, CommandModule } from "yargs"
+import { ChatHistory } from "../module/history.js"
+import { stringifyAction } from "../module/term.js"
 
 interface Args {
   videoId?: string
@@ -25,12 +30,79 @@ async function getStreams(
   return streams
 }
 
+export async function printChatResponse(
+  data: ChatResponse,
+  {
+    history,
+    mc,
+    prefix,
+    maxChats = 0,
+    verbose = false,
+    showTicker = false,
+  }: {
+    history: ChatHistory
+    mc: Masterchat
+    prefix?: string
+    maxChats?: number
+    verbose?: boolean
+    showTicker?: boolean
+  }
+) {
+  function log(...obj: any) {
+    const lines = obj.join(" ").split("\n")
+    for (const line of lines) {
+      if (prefix) process.stdout.write(chalk.gray(prefix) + " ")
+      console.log(line)
+    }
+  }
+
+  const ignoredActions = [
+    "addSuperChatTickerAction",
+    "addSuperStickerTickerAction",
+    "addMembershipTickerAction",
+  ]
+
+  const { actions, continuation } = data
+  if (verbose) {
+    log(
+      "actions",
+      actions.length,
+      "timeoutMs",
+      continuation?.timeoutMs,
+      "now",
+      new Date(),
+      "next",
+      continuation?.timeoutMs && new Date(Date.now() + continuation.timeoutMs)
+    )
+  }
+
+  const chats = actions.filter(
+    (action): action is AddChatItemAction => action.type === "addChatItemAction"
+  )
+
+  chats.forEach((chat) => {
+    history.insert(chat, mc.channelId)
+  })
+
+  let chatCount = 0
+  for (const action of actions) {
+    if (ignoredActions.includes(action.type)) continue
+
+    if (action.type === "addChatItemAction") {
+      if (chatCount >= maxChats) continue
+      chatCount += 1
+    }
+
+    log(await stringifyAction(action, { history, showAuthor: false }))
+  }
+}
+
 async function handlerMux(org?: string) {
   const history = new ChatHistory()
   const streams = new StreamPool({ mode: "live" })
 
   streams.on("data", (data, mc) =>
-    printData({ data, history, prefix: mc.videoId, mc })
+    printChatResponse(data, { history, prefix: mc.videoId, mc })
   )
 
   streams.on("end", (reason, { videoId }) =>
@@ -62,7 +134,7 @@ async function handlerSingle(videoId: string, channelId?: string) {
   console.log(url, `(${mc.isLive ? "live" : "replay"})`)
   console.log("-----------------")
 
-  mc.on("data", (data) => printData({ data, history, mc }))
+  mc.on("data", (data) => printChatResponse(data, { history, mc }))
   mc.on("error", (err) => console.log("[ERROR]", err, url))
   mc.on("end", (reason) => console.log("[END]", `reason=${reason}`, url))
 
@@ -77,22 +149,21 @@ async function handler(args: Arguments<Args>) {
   }
 }
 
-const commandModule: CommandModule<{}, Args> = {
+export const watch: CommandModule<{}, Args> = {
   command: "watch [videoId] [channelId]",
-  describe: "Pretty-print all events except live chat",
+  describe: "Observe all events except live chat",
   builder: {
     videoId: {
       desc: "Video ID or URL",
     },
     channelId: {
-      desc: "Channel id",
+      desc: "Channel ID",
     },
     org: {
-      desc: "Organization name to watch (ignored if `videoId` is provided)",
+      desc: "Organization name to watch (ignored if `videoId` is specified)",
+      alias: "o",
       default: "All Vtubers",
     },
   },
   handler,
 }
-
-export default commandModule

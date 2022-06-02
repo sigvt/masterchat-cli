@@ -12,7 +12,7 @@ function handler({ input, type }: Arguments<Args>) {
   pprintPbValue(pl)
 }
 
-const commandModule: CommandModule<{}, Args> = {
+export const pbd: CommandModule<{}, Args> = {
   command: "pbd <input> [type]",
   describe: "inspect protobuf token",
   builder: {
@@ -28,5 +28,3 @@ const commandModule: CommandModule<{}, Args> = {
   },
   handler,
 }
-
-export default commandModule
