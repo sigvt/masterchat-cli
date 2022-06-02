@@ -16,25 +16,25 @@ mc --help
 
 ## Use
 
-### `print`
+### `stream`, `s`
 
 Print live/replay chats.
 
 ```bash
-mc print <video ID or URL>
-mc print WpjhEqjngRQ --filter 'isSuperchat && color === "green"' --author # Only show green super chats
-mc print WpjhEqjngRQ --filter 'isMember' # Only show chats from members
-mc print WpjhEqjngRQ --filter 'isModerator || isVerified || isOwner' --author # Print chats from moderators/verified accounts/channel owner
-mc print WpjhEqjngRQ --filter '/^(\\[[a-z]+?\\]|[a-z]+?: )/i.test(message)' # Print live translations
-mc print WpjhEqjngRQ --filter 'message.includes("草")' # Only show chat contains 草
+mc stream -n <video ID or URL>
+mc stream WpjhEqjngRQ --filter 'isSuperchat && color === "green"' --name # Only show green super chats
+mc stream WpjhEqjngRQ --filter 'isMember' # Only show chats from members
+mc stream WpjhEqjngRQ --filter 'isModerator || isVerified || isOwner' --name # Print chats from moderators/verified accounts/channel owner
+mc stream WpjhEqjngRQ --filter '/^(\\[[a-z]+?\\]|[a-z]+?: )/i.test(message)' # Print live translations
+mc stream WpjhEqjngRQ --filter 'message.includes("草")' # Only show chat contains 草
 ```
 
 #### Options
 
 - `--type, -t <string>`: Chat type (`top` or `all`)
-- `--author, -a`: Show author name
+- `--name, -n`: Show author name
 - `--filter, -f <string>`: Filter chat/superchat events
-- `--mod`: Print moderation events
+- `--mods`: Print moderation events
 - `--verbose, -v`: Print additional info
 - `--collect, -c`: Save received actions as JSONLines (.jsonl)
 
