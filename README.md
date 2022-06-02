@@ -3,6 +3,8 @@
 [![npm](https://badgen.net/npm/v/masterchat-cli)](https://npmjs.org/package/masterchat-cli)
 [![npm: total downloads](https://badgen.net/npm/dt/masterchat-cli)](https://npmjs.org/package/masterchat-cli)
 
+![screenshot](https://github.com/holodata/ancient-one-dark/blob/master/.github/mccli.png?raw=true)
+
 See YouTube Live Chat through a flexible filtering engine. For a desktop app, see [☄️ Komet](https://github.com/holodata/komet).
 
 ## Install
